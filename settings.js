@@ -18,42 +18,83 @@ window.onload = function() {
 		styleActiveLine: true, // 显示选中行的样式
 	});
 	// 设置初始文本，这个选项也可以在fromTextArea中配置
-	var button = document.getElementById('run')
+	var button = document.getElementById('run');
 	button.onclick = function() {
 		var prog = Myeditor.getValue();
-		var mypre = document.getElementById("output");
-		mypre.innerHTML = '';
-		Sk.pre = "output";
-		Sk.configure({
-			output: outf,
-			read: builtinRead,
-			__future__: Sk.python3
-		});
-
-		(Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'canvas-map';
-		var myPromise = Sk.misceval.asyncToPromise(function() {
-			return Sk.importMainWithBody("TobyPyOnline", false, prog, true);
-		});
-
-		myPromise.then(function(mod) {
-				console.log('success');
-			},
-			function(err) {
-				outerr(err.toString());
+		if (prog) {
+			var mypre = document.getElementById("output");
+			mypre.innerHTML = '';
+			Sk.pre = "output";
+			Sk.configure({
+				output: outf,
+				read: builtinRead,
+				__future__: Sk.python3
 			});
+
+			(Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'canvas-map';
+			var myPromise = Sk.misceval.asyncToPromise(function() {
+				return Sk.importMainWithBody("TobyPyOnline", false, prog, true);
+			});
+
+			myPromise.then(function(mod) {
+					console.log('success');
+				},
+				function(err) {
+					outerr(err.toString());
+				});
+		} else {
+			var mypre = document.getElementById("output");
+			mypre.innerHTML = '';
+		}
 	}
+	document.onkeydown = function(e) {
+		e = e || window.event;
+		if (e.ctrlKey && e.keyCode == 66) { //快捷键 ctrl +B
+			var prog = Myeditor.getValue();
+			if (prog) {
+				var mypre = document.getElementById("output");
+				mypre.innerHTML = '';
+				Sk.pre = "output";
+				Sk.configure({
+					output: outf,
+					read: builtinRead,
+					__future__: Sk.python3
+				});
+
+				(Sk.TurtleGraphics || (Sk.TurtleGraphics = {})).target = 'canvas-map';
+				var myPromise = Sk.misceval.asyncToPromise(function() {
+					return Sk.importMainWithBody("TobyPyOnline", false, prog, true);
+				});
+
+				myPromise.then(function(mod) {
+						console.log('success');
+					},
+					function(err) {
+						outerr(err.toString());
+					});
+			} else {
+				var mypre = document.getElementById("output");
+				mypre.innerHTML = '';
+			}
+
+			return;
+		}
+	};
+
 }
 
 function outf(text) {
 	var mypre = document.getElementById("output");
 	mypre.innerText = mypre.innerText + text;
 }
+
 function outerr(err) {
 	var mypre = document.getElementById("output");
-	err2=err.replace('not yet implemented in Skulpt','not yet implemented in TobyPyOnline')
-	var err_code=`<p style="color:red;">${err2}</p>`
+	err2 = err.replace('not yet implemented in Skulpt', 'not yet implemented in TobyPyOnline')
+	var err_code = `<p style="color:red;">${err2}</p>`
 	mypre.innerHTML = mypre.innerHTML + err_code;
 }
+
 function builtinRead(x) {
 	if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
 		throw "File not found: '" + x + "'";
