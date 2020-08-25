@@ -1,0 +1,73 @@
+{
+  "_from": "skulpt",
+  "_id": "skulpt@1.0.0",
+  "_inBundle": false,
+  "_integrity": "sha512-WXnnwBKG3QYYK1qXz8KwUORb3C45MfEfEYeszJ3YfXoZoB+Nj0bkg59ffH5mcke4wIlThjXaqF5tRv72+4zPyw==",
+  "_location": "/skulpt",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "skulpt",
+    "name": "skulpt",
+    "escapedName": "skulpt",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/skulpt/-/skulpt-1.0.0.tgz",
+  "_shasum": "7e3f7d3cd470af1f2f36e6390f434b774d209df5",
+  "_spec": "skulpt",
+  "_where": "D:\\js-libs",
+  "author": {
+    "name": "Brad Miller"
+  },
+  "bugs": {
+    "url": "https://github.com/skulpt/skulpt/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Skulpt is a Javascript implementation of Python 2.x. Python that runs in your browser!",
+  "devDependencies": {
+    "jscs": "~1.12",
+    "jsdoc": "~3.5.5",
+    "jshint": "~2.5.2"
+  },
+  "homepage": "http://www.skulpt.org/",
+  "keywords": [
+    "skulpt"
+  ],
+  "license": "MIT",
+  "name": "skulpt",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skulpt/skulpt.git"
+  },
+  "scripts": {
+    "browser": "python skulpt.py browser",
+    "build": "python skulpt.py dist",
+    "build-min": "python skulpt.py dist -u",
+    "debugbrowser": "python skulpt.py debugbrowser",
+    "doc": "python skulpt.py doc",
+    "doctest": "python skulpt.py doctest",
+    "host": "python skulpt.py host",
+    "regenasttests": "python skulpt.py regenasttests",
+    "regengooglocs": "python skulpt.py regengooglocs",
+    "regenparser": "python skulpt.py regenparser",
+    "regenruntests": "python skulpt.py regenruntests",
+    "regensymtabtests": "python skulpt.py regensymtabtests",
+    "repl": "python skulpt.py repl",
+    "rununits": "python skulpt.py rununits",
+    "test": "python skulpt.py test",
+    "test3": "python skulpt.py test3",
+    "testdebug": "python skulpt.py testdebug",
+    "upload": "python skulpt.py upload",
+    "vfs": "python skulpt.py vfs",
+    "vmwareregr": "python skulpt.py vmwareregr"
+  },
+  "version": "1.0.0"
+}
