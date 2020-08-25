@@ -22,6 +22,13 @@ window.onload = function() {
 	button.onclick = function() {
 		var prog = Myeditor.getValue();
 		if (prog) {
+			var Turtlecanvas = document.getElementById('canvas-map')
+			Turtlecanvas.innerHTML =
+				`<div id="canvas-map" class="mdui-color-white">
+						<div class="mdui-valign">
+						  <p class="mdui-center">一片空白，等你写代码</p>
+						</div>
+					</div>`;
 			var mypre = document.getElementById("output");
 			mypre.innerHTML = '';
 			Sk.pre = "output";
@@ -45,6 +52,13 @@ window.onload = function() {
 		} else {
 			var mypre = document.getElementById("output");
 			mypre.innerHTML = '';
+			var Turtlecanvas = document.getElementById('canvas-map')
+			Turtlecanvas.innerHTML =
+				`<div id="canvas-map" class="mdui-color-white">
+						<div class="mdui-valign">
+						  <p class="mdui-center">一片空白，等你写代码</p>
+						</div>
+					</div>`;
 		}
 	}
 	document.onkeydown = function(e) {
@@ -52,6 +66,13 @@ window.onload = function() {
 		if (e.ctrlKey && e.keyCode == 66) { //快捷键 ctrl +B
 			var prog = Myeditor.getValue();
 			if (prog) {
+				var Turtlecanvas = document.getElementById('canvas-map')
+				Turtlecanvas.innerHTML =
+					`<div id="canvas-map" class="mdui-color-white">
+							<div class="mdui-valign">
+							  <p class="mdui-center">一片空白，等你写代码</p>
+							</div>
+						</div>`;
 				var mypre = document.getElementById("output");
 				mypre.innerHTML = '';
 				Sk.pre = "output";
@@ -75,6 +96,13 @@ window.onload = function() {
 			} else {
 				var mypre = document.getElementById("output");
 				mypre.innerHTML = '';
+				var Turtlecanvas = document.getElementById('canvas-map')
+				Turtlecanvas.innerHTML =
+					`<div id="canvas-map" class="mdui-color-white">
+							<div class="mdui-valign">
+							  <p class="mdui-center">一片空白，等你写代码</p>
+							</div>
+						</div>`;
 			}
 
 			return;
