@@ -31,17 +31,15 @@ except:
     GIT_MODULE_AVAILABLE = False
 
 def bowerFileName():
-    file = open(".bowerrc")
-    data = json.load(file)
-    fileName = data["json"]
-    file.close()
+    with open(".bowerrc") as file:
+        data = json.load(file)
+        fileName = data["json"]
     return fileName
 
 def bowerProperty(name):
-    file = open(bowerFileName())
-    data = json.load(file)
-    value = data[name]
-    file.close()
+    with open(bowerFileName()) as file:
+        data = json.load(file)
+        value = data[name]
     return value
 
 # Symbolic constants for the project structure.
@@ -143,12 +141,11 @@ TestFiles = [
 
 def buildNamedTestsFile():
     testFiles = ['test/run/'+f.replace(".py","") for f in os.listdir('test/run') if re.match(r"test_.*\.py$",f)]
-    nt = open("{0}/namedtests.js".format(TEST_DIR),'w')
-    nt.write("namedtfiles = [")
-    for f in testFiles:
-        nt.write("'%s',\n" % f)
-    nt.write("];")
-    nt.close()
+    with open("{0}/namedtests.js".format(TEST_DIR),'w') as nt:
+        nt.write("namedtfiles = [")
+        for f in testFiles:
+            nt.write("'%s',\n" % f)
+        nt.write("];")
 
 def isClean():
     repo = Repo(".")
@@ -165,12 +162,10 @@ def getFileList(type, include_ext_libs=True):
         if isinstance(f, tuple):
             if f[1] == type:
                 ret.append(f[0])
+        elif "*" in f:
+            ret.extend(f for _ in glob.glob(f))
         else:
-            if "*" in f:
-                for g in glob.glob(f):
-                    ret.append(f)
-            else:
-                ret.append(f)
+            ret.append(f)
     return ret
 
 def is64bit():
@@ -550,18 +545,21 @@ def debugbrowser():
     if not os.path.exists("support/tmp"):
         os.mkdir("support/tmp")
     buildVFS()
-    scripts = []
-    for f in getFileList(FILE_TYPE_TEST) + ["{0}/browser-stubs.js".format(TEST_DIR), "support/tmp/vfs.js" ] + TestFiles:
-        scripts.append('<script type="text/javascript" src="%s"></script>' %
-                os.path.join('../..', f))
+    scripts = [
+        '<script type="text/javascript" src="%s"></script>'
+        % os.path.join('../..', f)
+        for f in getFileList(FILE_TYPE_TEST)
+        + ["{0}/browser-stubs.js".format(TEST_DIR), "support/tmp/vfs.js"]
+        + TestFiles
+    ]
 
     with open("support/tmp/test.html", "w") as f:
         print >>f, tmpl % '\n'.join(scripts)
 
-    if sys.platform == "win32":
-        os.system("start support/tmp/test.html")
-    elif sys.platform == "darwin":
+    if sys.platform == "darwin":
         os.system("open support/tmp/test.html")
+    elif sys.platform == "win32":
+        os.system("start support/tmp/test.html")
     else:
         os.system("gnome-open support/tmp/test.html")
 
@@ -682,14 +680,13 @@ function quit(rc)
     print ". Built %s" % outfn
 
 def getInternalCodeAsJson():
-    ret = {}
-    ret['files'] = {}
-    for f in ["src/" + x for x in os.listdir("src") if os.path.splitext(x)[1] == ".py" if os.path.isfile("src/" + x)]:
+    ret = {'files': {}}
+    for f in [f"src/{x}" for x in os.listdir("src") if os.path.splitext(x)[1] == ".py" if os.path.isfile("src/" + x)]:
         ext = os.path.splitext(f)[1]
         if ext == ".py":
             f = f.replace("\\", "/")
             ret['files'][f] = open(f).read()
-    return "Sk.internalPy=" + json.dumps(ret)
+    return f"Sk.internalPy={json.dumps(ret)}"
 
 def getBuiltinsAsJson(options):
     ret = {}
@@ -885,17 +882,16 @@ def make_skulpt_js(options,dest):
         os.chmod(os.path.join(dest, OUTFILE_REG), 0o444)
 
 def run_in_browser(fn, options, debug_mode=False, p3=False):
-    if p3:
-        p3_str = "Sk.python3"
-    else:
-        p3_str = "Sk.python2"
+    p3_str = "Sk.python3" if p3 else "Sk.python2"
     shutil.rmtree(RUN_DIR, ignore_errors=True)
     if not os.path.exists(RUN_DIR): os.mkdir(RUN_DIR)
     docbi(options,RUN_DIR)
-    scripts = []
-    for f in getFileList(FILE_TYPE_TEST):
-        scripts.append('<script type="text/javascript" src="%s"></script>' %
-                os.path.join('../..', f))
+    scripts = [
+        '<script type="text/javascript" src="%s"></script>'
+        % os.path.join('../..', f)
+        for f in getFileList(FILE_TYPE_TEST)
+    ]
+
     scripts = "\n".join(scripts)
 
     with open (fn,'r') as runfile:
@@ -944,19 +940,19 @@ def regenruntests(togen="{0}/run/*.py".format(TEST_DIR)):
     """regenerate the test data by running the tests on real python"""
     for f in glob.glob(togen):
         os.system("python {0} > {1}.real 2>&1".format(f, f))
-        forcename = f + ".real.force"
+        forcename = f"{f}.real.force"
         if os.path.exists(forcename):
-            shutil.copy(forcename, "%s.real" % f)
+            shutil.copy(forcename, f"{f}.real")
         if crlfprog:
-            os.system("python %s %s.real" % (crlfprog, f))
+            os.system(f"python {crlfprog} {f}.real")
     for f in glob.glob("{0}/interactive/*.py".format(TEST_DIR)):
-        p = Popen("python -i > %s.real 2>%s" % (f, nul), shell=True, stdin=PIPE)
+        p = Popen(f"python -i > {f}.real 2>{nul}", shell=True, stdin=PIPE)
         p.communicate(open(f).read() + "\004")
-        forcename = f + ".real.force"
+        forcename = f"{f}.real.force"
         if os.path.exists(forcename):
-            shutil.copy(forcename, "%s.real" % f)
+            shutil.copy(forcename, f"{f}.real")
         if crlfprog:
-            os.system("python %s %s.real" % (crlfprog, f))
+            os.system(f"python {crlfprog} {f}.real")
 
 def doc():
     print "Building Documentation in docs/ProgMan"
@@ -996,30 +992,49 @@ def symtabdump(fn):
         ret += "%s-- Identifiers --\n" % indent
         for ident in sorted(obj.get_identifiers()):
             info = obj.lookup(ident)
-            ret += "%sname: %s\n  %sis_referenced: %s\n  %sis_imported: %s\n  %sis_parameter: %s\n  %sis_global: %s\n  %sis_declared_global: %s\n  %sis_local: %s\n  %sis_free: %s\n  %sis_assigned: %s\n  %sis_namespace: %s\n  %snamespaces: [\n%s  %s]\n" % (
-                    indent, info.get_name(),
-                    indent, info.is_referenced(),
-                    indent, info.is_imported(),
-                    indent, info.is_parameter(),
-                    indent, info.is_global(),
-                    indent, info.is_declared_global(),
-                    indent, info.is_local(),
-                    indent, info.is_free(),
-                    indent, info.is_assigned(),
-                    indent, info.is_namespace(),
-                    indent, '\n'.join([getidents(x, indent + "    ") for x in info.get_namespaces()]),
-                    indent
-                    )
+            ret += (
+                "%sname: %s\n  %sis_referenced: %s\n  %sis_imported: %s\n  %sis_parameter: %s\n  %sis_global: %s\n  %sis_declared_global: %s\n  %sis_local: %s\n  %sis_free: %s\n  %sis_assigned: %s\n  %sis_namespace: %s\n  %snamespaces: [\n%s  %s]\n"
+                % (
+                    indent,
+                    info.get_name(),
+                    indent,
+                    info.is_referenced(),
+                    indent,
+                    info.is_imported(),
+                    indent,
+                    info.is_parameter(),
+                    indent,
+                    info.is_global(),
+                    indent,
+                    info.is_declared_global(),
+                    indent,
+                    info.is_local(),
+                    indent,
+                    info.is_free(),
+                    indent,
+                    info.is_assigned(),
+                    indent,
+                    info.is_namespace(),
+                    indent,
+                    '\n'.join(
+                        [
+                            getidents(x, f"{indent}    ")
+                            for x in info.get_namespaces()
+                        ]
+                    ),
+                    indent,
+                )
+            )
+
         return ret
     return getidents(mod)
 
 def regensymtabtests(togen="{0}/run/*.py".format(TEST_DIR)):
     """regenerate the test data by running the symtab dump via real python"""
     for fn in glob.glob(togen):
-        outfn = "%s.symtab" % fn
-        f = open(outfn, "wb")
-        f.write(symtabdump(fn))
-        f.close()
+        outfn = f"{fn}.symtab"
+        with open(outfn, "wb") as f:
+            f.write(symtabdump(fn))
 
 def upload():
     """uploads doc to GAE (stub app for static hosting, mostly)"""

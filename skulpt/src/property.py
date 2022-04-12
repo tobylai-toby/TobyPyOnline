@@ -6,10 +6,7 @@ class property(object):
         self.fset = fset
         self.fdel = fdel
         if doc is None and fget is not None:
-            if hasattr(fget, '__doc__'):
-                doc = fget.__doc__
-            else:
-                doc = None
+            doc = fget.__doc__ if hasattr(fget, '__doc__') else None
         self.__doc__ = doc
 
     def __get__(self, obj, objtype=None):

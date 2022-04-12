@@ -2,6 +2,7 @@
 
 """Token constants (from "token.h")."""
 
+
 #  Taken from Python (r53757) and modified to include some tokens
 #   originally monkeypatched in by pgen2.tokenize
 
@@ -66,10 +67,11 @@ N_TOKENS = 56
 NT_OFFSET = 256
 #--end constants--
 
-tok_name = {}
-for _name, _value in list(globals().items()):
-    if type(_value) is type(0):
-        tok_name[_value] = _name
+tok_name = {
+    _value: _name
+    for _name, _value in list(globals().items())
+    if type(_value) is type(0)
+}
 
 
 def ISTERMINAL(x):
