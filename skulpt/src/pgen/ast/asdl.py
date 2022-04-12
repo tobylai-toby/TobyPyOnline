@@ -234,12 +234,10 @@ class Module(AST):
         self.name = name
         self.dfns = dfns
         self.version = version
-        self.types = {} # maps type name to value (from dfns)
-        for type in dfns:
-            self.types[type.name.value] = type.value
+        self.types = {type.name.value: type.value for type in dfns}
 
     def __repr__(self):
-        return "Module(%s, %s)" % (self.name, self.dfns)
+        return f"Module({self.name}, {self.dfns})"
 
 class Type(AST):
     def __init__(self, name, value):
@@ -247,7 +245,7 @@ class Type(AST):
         self.value = value
 
     def __repr__(self):
-        return "Type(%s, %s)" % (self.name, self.value)
+        return f"Type({self.name}, {self.value})"
 
 class Constructor(AST):
     def __init__(self, name, fields=None):
@@ -255,7 +253,7 @@ class Constructor(AST):
         self.fields = fields or []
 
     def __repr__(self):
-        return "Constructor(%s, %s)" % (self.name, self.fields)
+        return f"Constructor({self.name}, {self.fields})"
 
 class Field(AST):
     def __init__(self, type, name=None, seq=0, opt=0):
@@ -272,9 +270,9 @@ class Field(AST):
         else:
             extra = ""
         if self.name is None:
-            return "Field(%s%s)" % (self.type, extra)
+            return f"Field({self.type}{extra})"
         else:
-            return "Field(%s, %s%s)" % (self.type, self.name, extra)
+            return f"Field({self.type}, {self.name}{extra})"
 
 class Sum(AST):
     def __init__(self, types, attributes=None):
@@ -283,16 +281,16 @@ class Sum(AST):
 
     def __repr__(self):
         if self.attributes is None:
-            return "Sum(%s)" % self.types
+            return f"Sum({self.types})"
         else:
-            return "Sum(%s, %s)" % (self.types, self.attributes)
+            return f"Sum({self.types}, {self.attributes})"
 
 class Product(AST):
     def __init__(self, fields):
         self.fields = fields
 
     def __repr__(self):
-        return "Product(%s)" % self.fields
+        return f"Product({self.fields})"
 
 class VisitorBase(object):
 
@@ -320,11 +318,8 @@ class VisitorBase(object):
         klass = object.__class__
         meth = self.cache.get(klass)
         if meth is None:
-            methname = "visit" + klass.__name__
-            if self.skip:
-                meth = getattr(self, methname, None)
-            else:
-                meth = getattr(self, methname)
+            methname = f"visit{klass.__name__}"
+            meth = getattr(self, methname, None) if self.skip else getattr(self, methname)
             self.cache[klass] = meth
         return meth
 

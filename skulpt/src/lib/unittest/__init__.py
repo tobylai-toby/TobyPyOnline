@@ -36,7 +36,7 @@ class TestCase:
 
         for func in self.tlist:
             if self.verbosity > 1:
-                print('Running %s' % self.cleanName(func))
+                print(f'Running {self.cleanName(func)}')
             try:
                 self.setUp()
                 self.assertPassed = 0
@@ -47,83 +47,83 @@ class TestCase:
                     self.numPassed += 1
                 else:
                     self.numFailed += 1
-                    print('Tests failed in %s ' % self.cleanName(func))
+                    print(f'Tests failed in {self.cleanName(func)} ')
             except Exception as e:
                 self.assertFailed += 1
                 self.numFailed += 1
-                print('Test threw exception in %s (%s)' % (self.cleanName(func), e))
+                print(f'Test threw exception in {self.cleanName(func)} ({e})')
         self.showSummary()
 
     def assertEqual(self, actual, expected, feedback=""):
         res = actual==expected
         if not res and feedback == "":
-            feedback = "Expected %s to equal %s" % (str(actual),str(expected))
+            feedback = f"Expected {str(actual)} to equal {str(expected)}"
         self.appendResult(res, actual ,expected, feedback)
 
     def assertNotEqual(self, actual, expected, feedback=""):
         res = actual != expected
         if not res and feedback == "":
-            feedback = "Expected %s to not equal %s" % (str(actual),str(expected))
+            feedback = f"Expected {str(actual)} to not equal {str(expected)}"
         self.appendResult(res, actual, expected, feedback)
 
     def assertTrue(self,x, feedback=""):
-        res = bool(x) is True
+        res = bool(x)
         if not res and feedback == "":
-            feedback = "Expected %s to be True" % (str(x))
+            feedback = f"Expected {str(x)} to be True"
         self.appendResult(res, x, True, feedback)
 
     def assertFalse(self,x, feedback=""):
         res = not bool(x)
         if not res and feedback == "":
-            feedback = "Expected %s to be False" % (str(x))
+            feedback = f"Expected {str(x)} to be False"
         self.appendResult(res, x, False, feedback)
 
     def assertIs(self,a,b, feedback=""):
         res = a is b
         if not res and feedback == "":
-            feedback = "Expected %s to be the same object as %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to be the same object as {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertIsNot(self,a,b, feedback=""):
         res = a is not b
         if not res and feedback == "":
-            feedback = "Expected %s to not be the same object as %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to not be the same object as {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertIsNone(self,x, feedback=""):
         res = x is None
         if not res and feedback == "":
-            feedback = "Expected %s to be None" % (str(x))
+            feedback = f"Expected {str(x)} to be None"
         self.appendResult(res, x, None, feedback)
 
     def assertIsNotNone(self,x, feedback=""):
         res = x is not None
         if not res and feedback == "":
-            feedback = "Expected %s to not be None" % (str(x))
+            feedback = f"Expected {str(x)} to not be None"
         self.appendResult(res, x, None, feedback)
 
     def assertIn(self, a, b, feedback=""):
         res = a in b
         if not res and feedback == "":
-            feedback = "Expected %s to be in %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to be in {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertNotIn(self, a, b, feedback=""):
         res = a not in b
         if not res and feedback == "":
-            feedback = "Expected %s to not be in %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to not be in {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertIsInstance(self,a,b, feedback=""):
         res = isinstance(a,b)
         if not res and feedback == "":
-            feedback = "Expected %s to be an instance of %s" % (str(a), str(b))
+            feedback = f"Expected {str(a)} to be an instance of {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertNotIsInstance(self,a,b, feedback=""):
         res = not isinstance(a,b)
         if not res and feedback == "":
-            feedback = "Expected %s to not be an instance of %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to not be an instance of {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertAlmostEqual(self, a, b, places=7, feedback="", delta=None):
@@ -134,15 +134,15 @@ class TestCase:
             if places is None:
                 places = 7
             res = round(a-b, places) == 0
-        
+
         if not res and feedback == "":
-            feedback = "Expected %s to equal %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to equal {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertNotAlmostEqual(self, a, b, places=7, feedback="", delta=None):
 
         if delta is not None:
-            res = not (a == b) and abs(a - b) > delta
+            res = a != b and abs(a - b) > delta
         else:
             if places is None:
                 places = 7
@@ -150,31 +150,31 @@ class TestCase:
             res = round(a-b, places) != 0
 
         if not res and feedback == "":
-            feedback = "Expected %s to not equal %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to not equal {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertGreater(self,a,b, feedback=""):
         res = a > b
         if not res and feedback == "":
-            feedback = "Expected %s to be greater than %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to be greater than {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertGreaterEqual(self,a,b, feedback=""):
         res = a >= b
         if not res and feedback == "":
-            feedback = "Expected %s to be >= %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to be >= {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertLess(self, a, b, feedback=""):
         res = a < b
         if not res and feedback == "":
-            feedback = "Expected %s to be less than %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to be less than {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def assertLessEqual(self,a,b, feedback=""):
         res = a <= b
         if not res and feedback == "":
-            feedback = "Expected %s to be <= %s" % (str(a),str(b))
+            feedback = f"Expected {str(a)} to be <= {str(b)}"
         self.appendResult(res, a, b, feedback)
 
     def appendResult(self,res,actual,expected,feedback):
@@ -182,7 +182,7 @@ class TestCase:
             msg = 'Pass'
             self.assertPassed += 1
         else:
-            msg = 'Fail: ' +  feedback
+            msg = f'Fail: {feedback}'
             print(msg)
             self.assertFailed += 1
 
@@ -201,17 +201,14 @@ class TestCase:
             res = True
         except Exception as inst:
             actualerror = str(inst)
-            print("ACT = ", actualerror, str(exception()))
+            print("ACT = ", actualerror, exception())
         else:
             actualerror = "No Error"
 
         self.appendResult(res, str(exception()), actualerror, "")
 
     def fail(self, msg=None):
-        if msg is None:
-            msg = 'Fail'
-        else:
-            msg = 'Fail: ' + msg
+        msg = 'Fail' if msg is None else f'Fail: {msg}'
         print(msg)
         self.assertFailed += 1
 

@@ -433,8 +433,7 @@ def _accum(tag, sofar, num, factor, leftover):
         fracpart, intpart = _math.modf(factor * fracpart)
         rsum += int(intpart)
         return rsum, leftover + fracpart
-    raise TypeError("unsupported type for timedelta %s component: %s" %
-                    (tag, type(num)))
+    raise TypeError(f"unsupported type for timedelta {tag} component: {type(num)}")
 
 class timedelta(object):
     """Represent the difference between two datetime objects.
@@ -585,10 +584,7 @@ class timedelta(object):
                                  False)
 
     def __abs__(self):
-        if self._days < 0:
-            return -self
-        else:
-            return self
+        return -self if self._days < 0 else self
 
     def __mul__(self, other):
         if not isinstance(other, (int, long)):
@@ -609,16 +605,10 @@ class timedelta(object):
     # Comparisons of timedelta objects with other.
 
     def __eq__(self, other):
-        if isinstance(other, timedelta):
-            return self._cmp(other) == 0
-        else:
-            return False
+        return self._cmp(other) == 0 if isinstance(other, timedelta) else False
 
     def __ne__(self, other):
-        if isinstance(other, timedelta):
-            return self._cmp(other) != 0
-        else:
-            return True
+        return self._cmp(other) != 0 if isinstance(other, timedelta) else True
 
     def __le__(self, other):
         if isinstance(other, timedelta):
@@ -769,8 +759,10 @@ class date(object):
 
     def __format__(self, fmt):
         if not isinstance(fmt, (str, unicode)):
-            raise ValueError("__format__ expects str or unicode, not %s" %
-                             fmt.__class__.__name__)
+            raise ValueError(
+                f"__format__ expects str or unicode, not {fmt.__class__.__name__}"
+            )
+
         if len(fmt) != 0:
             return self.strftime(fmt)
         return str(self)
@@ -1003,17 +995,13 @@ class tzinfo(object):
         dtdst = dt.dst()
         if dtdst is None:
             raise ValueError("fromutc() requires a non-None dst() result")
-        delta = dtoff - dtdst
-        if delta:
+        if delta := dtoff - dtdst:
             dt = dt + delta
             dtdst = dt.dst()
             if dtdst is None:
                 raise ValueError("fromutc(): dt.dst gave inconsistent "
                                  "results; cannot convert")
-        if dtdst:
-            return dt + dtdst
-        else:
-            return dt
+        return dt + dtdst if dtdst else dt
 
 _tzinfo_class = tzinfo
 
@@ -1094,16 +1082,10 @@ class time(object):
     # Comparisons of time objects with other.
 
     def __eq__(self, other):
-        if isinstance(other, time):
-            return self._cmp(other) == 0
-        else:
-            return False
+        return self._cmp(other) == 0 if isinstance(other, time) else False
 
     def __ne__(self, other):
-        if isinstance(other, time):
-            return self._cmp(other) != 0
-        else:
-            return True
+        return self._cmp(other) != 0 if isinstance(other, time) else True
 
     def __le__(self, other):
         if isinstance(other, time):
@@ -1157,15 +1139,16 @@ class time(object):
     def __hash__(self):
         """Hash."""
         if self._hashcode == -1:
-            tzoff = self._utcoffset()
-            if not tzoff:  # zero or None
-                self._hashcode = hash(self._getstate()[0])
-            else:
+            if tzoff := self._utcoffset():
                 h, m = divmod(self.hour * 60 + self.minute - tzoff, 60)
-                if 0 <= h < 24:
-                    self._hashcode = hash(time(h, m, self.second, self.microsecond))
-                else:
-                    self._hashcode = hash((h, m, self.second, self.microsecond))
+                self._hashcode = (
+                    hash(time(h, m, self.second, self.microsecond))
+                    if 0 <= h < 24
+                    else hash((h, m, self.second, self.microsecond))
+                )
+
+            else:
+                self._hashcode = hash(self._getstate()[0])
         return self._hashcode
 
     # Conversion to string
@@ -1208,8 +1191,7 @@ class time(object):
         """
         s = _format_time(self._hour, self._minute, self._second,
                          self._microsecond)
-        tz = self._tzstr()
-        if tz:
+        if tz := self._tzstr():
             s += tz
         return s
 
@@ -1228,8 +1210,10 @@ class time(object):
 
     def __format__(self, fmt):
         if not isinstance(fmt, (str, unicode)):
-            raise ValueError("__format__ expects str or unicode, not %s" %
-                             fmt.__class__.__name__)
+            raise ValueError(
+                f"__format__ expects str or unicode, not {fmt.__class__.__name__}"
+            )
+
         if len(fmt) != 0:
             return self.strftime(fmt)
         return str(self)
@@ -1446,8 +1430,7 @@ class datetime(date):
         "Return UTC time tuple compatible with time.gmtime()."
         y, m, d = self.year, self.month, self.day
         hh, mm, ss = self.hour, self.minute, self.second
-        offset = self._utcoffset()
-        if offset:  # neither None nor 0
+        if offset := self._utcoffset():
             mm -= offset
             y, m, d, hh, mm, ss, _ = _normalize_datetime(
                 y, m, d, hh, mm, ss, 0, ignore_overflow=True)
@@ -1556,9 +1539,9 @@ class datetime(date):
             del L[-1]
         s = ", ".join(map(str, L))
         module = "datetime." if self.__class__ is datetime else ""
-        s = "%s(%s)" % (module + self.__class__.__name__, s)
+        s = f"{module + self.__class__.__name__}({s})"
         if self._tzinfo is not None:
-            assert s[-1:] == ")"
+            assert s.endswith(")")
             s = s[:-1] + ", tzinfo=%r" % self._tzinfo + ")"
         return s
 
@@ -1574,7 +1557,7 @@ class datetime(date):
         # element is a time.struct_time object.  The second is the
         # microseconds (which are not defined for time.struct_time).
         struct, micros = _strptime(date_string, format)
-        return cls(*(struct[0:6] + (micros,)))
+        return cls(*struct[:6] + (micros,))
 
     def utcoffset(self):
         """Return the timezone offset in minutes east of UTC (negative west of
@@ -1711,7 +1694,7 @@ class datetime(date):
         diff = self - other     # this will take offsets into account
         if diff.days < 0:
             return -1
-        return diff and 1 or 0
+        return 1 if diff else 0
 
     def _add_timedelta(self, other, factor):
         y, m, d, hh, mm, ss, us = _normalize_datetime(
@@ -1726,9 +1709,11 @@ class datetime(date):
 
     def __add__(self, other):
         "Add a datetime and a timedelta."
-        if not isinstance(other, timedelta):
-            return NotImplemented
-        return self._add_timedelta(other, 1)
+        return (
+            self._add_timedelta(other, 1)
+            if isinstance(other, timedelta)
+            else NotImplemented
+        )
 
     __radd__ = __add__
 

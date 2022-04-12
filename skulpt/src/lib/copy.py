@@ -14,12 +14,11 @@ def copy(x):
     cls = type(x)
     if callable(x):
         return x
-    copier = getattr(cls, "__copy__", None)
-    if copier:
+    if copier := getattr(cls, "__copy__", None):
         return copier(x)
     if cls in (type(None), int, float, bool, long, str, tuple, type):
         return x
-    if (cls == list) or (cls == dict) or (cls == set) or (cls == slice):
+    if cls in [list, dict, set, slice]:
         return cls(x)
     try:
         getstate = getattr(x, "__getstate__", None)
@@ -29,18 +28,15 @@ def copy(x):
         reductor = False
     if getstate or setstate or initargs:
         raise NotImplementedError("Skulpt does not yet support copying with user-defined __getstate__, __setstate__ or __getinitargs__()")
-    reductor = getattr(x, "__reduce_ex__", None)
-    if reductor:
+    if reductor := getattr(x, "__reduce_ex__", None):
         rv = reductor(4)
+    elif reductor := getattr(x, "__reduce__", None):
+        rv = reductor()
+    elif str(cls)[1:6] == "class":
+        copier = _copy_inst
+        return copier(x)
     else:
-        reductor = getattr(x, "__reduce__", None)
-        if reductor:
-            rv = reductor()
-        elif str(cls)[1:6] == "class":
-            copier = _copy_inst
-            return copier(x)
-        else:
-            raise Error("un(shallow)copyable object of type %s" % cls)
+        raise Error(f"un(shallow)copyable object of type {cls}")
     if isinstance(rv, str):
         return x
     return _reconstruct(x, rv, 0)
@@ -54,10 +50,7 @@ def _copy_inst(x):
     else:
         y = _EmptyClass()
         y.__class__ = x.__class__
-    if hasattr(x, '__getstate__'):
-        state = x.__getstate__()
-    else:
-        state = x.__dict__
+    state = x.__getstate__() if hasattr(x, '__getstate__') else x.__dict__
     if hasattr(y, '__setstate__'):
         y.__setstate__(state)
     else:
@@ -85,8 +78,7 @@ def deepcopy(x, memo=None, _nil=[]):
         reductor = False
     if getstate or setstate or initargs:
         raise NotImplementedError("Skulpt does not yet support copying with user-defined __getstate__, __setstate__ or __getinitargs__()")
-    copier = _deepcopy_dispatch.get(cls)
-    if copier:
+    if copier := _deepcopy_dispatch.get(cls):
         y = copier(x, memo)
     elif str(cls)[1:6] == "class":
         copier = _deepcopy_dispatch["InstanceType"]
@@ -98,22 +90,16 @@ def deepcopy(x, memo=None, _nil=[]):
             issc = 0
         if issc:
             y = _deepcopy_atomic(x, memo)
+        elif copier := getattr(x, "__deepcopy__", None):
+            y = copier(memo)
         else:
-            copier = getattr(x, "__deepcopy__", None)
-            if copier:
-                y = copier(memo)
+            if reductor := getattr(x, "__reduce_ex__", None):
+                rv = reductor(2)
+            elif reductor := getattr(x, "__reduce__", None):
+                rv = reductor()
             else:
-                reductor = getattr(x, "__reduce_ex__", None)
-                if reductor:
-                    rv = reductor(2)
-                else:
-                    reductor = getattr(x, "__reduce__", None)
-                    if reductor:
-                        rv = reductor()
-                    else:
-                        raise Error(
-                            "un(deep)copyable object of type %s" % cls)
-                y = _reconstruct(x, rv, 1, memo)
+                raise Error(f"un(deep)copyable object of type {cls}")
+            y = _reconstruct(x, rv, 1, memo)
     memo[idx] = y
     _keep_alive(x, memo) # Make sure x lives at least as long as d
     return y
@@ -141,8 +127,7 @@ d[types.FunctionType] = _deepcopy_atomic
 def _deepcopy_list(x, memo):
     y = []
     memo[id(x)] = y
-    for a in x:
-        y.append(deepcopy(a, memo))
+    y.extend(deepcopy(a, memo) for a in x)
     return y
 d[list] = _deepcopy_list
 
@@ -195,10 +180,7 @@ def _deepcopy_inst(x, memo):
         y = _EmptyClass()
         y.__class__ = x.__class__
     memo[id(x)] = y
-    if hasattr(x, '__getstate__'):
-        state = x.__getstate__()
-    else:
-        state = x.__dict__
+    state = x.__getstate__() if hasattr(x, '__getstate__') else x.__dict__
     state = deepcopy(state, memo)
     if hasattr(y, '__setstate__'):
         y.__setstate__(state)
@@ -229,20 +211,11 @@ def _reconstruct(x, info, deep, memo=None):
     if memo is None:
         memo = {}
     n = len(info)
-    assert n in (2, 3, 4, 5)
+    assert n in {2, 3, 4, 5}
     callable, args = info[:2]
-    if n > 2:
-        state = info[2]
-    else:
-        state = None
-    if n > 3:
-        listiter = info[3]
-    else:
-        listiter = None
-    if n > 4:
-        dictiter = info[4]
-    else:
-        dictiter = None
+    state = info[2] if n > 2 else None
+    listiter = info[3] if n > 3 else None
+    dictiter = info[4] if n > 4 else None
     if deep:
         args = deepcopy(args, memo)
     y = callable(*args)
